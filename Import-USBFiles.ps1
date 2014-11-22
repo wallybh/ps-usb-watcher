@@ -16,9 +16,10 @@ try
     #copiar vídeos para a pasta de destino
     foreach ($item in $Script:files)
     {
+        $Script:from = $item.Name
         $fileDest = "{0}\{1:yy-MM-dd}\{2}" -f $global:usbWatcherDestFolder,$item.LastWriteTime,$item.Name
 
-        #write-progress -activity "Copiando arquivos" -status "Progress:" -percentcomplete ($i/$files.count*100)    
+        write-progress -activity "Copiando arquivos:" -status "Arquivo: $Script:from" -percentcomplete ($i/$files.count*100)    
 
         if(! (Test-Path $fileDest))
         {
