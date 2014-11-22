@@ -7,22 +7,34 @@ if((! $global:usbWatcherDestFolder) -or (! (Test-Path $global:usbWatcherDestFold
 
 $fileQuery = ("{0}\*.mp4" -f $event.SourceEventArgs.NewEvent.TargetInstance.Name)
 
-#copiar vídeos para a pasta de destino
-foreach ($item in (ls $fileQuery -Recurse))
+write-host $file
+
+try
 {
-    $fileDest = "{0}\{1:yy-MM-dd}\{2} " -f $global:usbWatcherDestFolder,$item.LastWriteTime,$item.Name
-
-    Write-Host $fileDest
-
-    if(! (Test-Path $fileDest))
+    $i = 0
+    $Script:files = (ls $fileQuery -Recurse)
+    #copiar vídeos para a pasta de destino
+    foreach ($item in $Script:files)
     {
-        Write-Host "Copiando arquivo $item"
-        copy-item $item.FullName $fileDest -Recurse -Force
+        $fileDest = "{0}\{1:yy-MM-dd}\{2}" -f $global:usbWatcherDestFolder,$item.LastWriteTime,$item.Name
+
+        #write-progress -activity "Copiando arquivos" -status "Progress:" -percentcomplete ($i/$files.count*100)    
+
+        if(! (Test-Path $fileDest))
+        {
+            Write-Host "Copiando arquivo $item"
+            New-Item -Force (split-path $fileDest -parent) -ItemType directory
+            copy-item $item.FullName $fileDest -Force
+        }
+
+        $i = $i+1;
     }
 }
+catch [System.Exception]
+{
+    Write-Host $_.Exception.Message
+}
 
-
-#$global:teste = $event.SourceEventArgs.NewEvent.TargetInstance.Name
 
 #GET-WMIOBJECT win32_diskdrive | Where { $_.InterfaceType –eq ‘USB’ -and $_.SerialNumber -eq $event.SourceEventArgs.NewEvent.TargetInstance.VolumeSerialNumber }
 
